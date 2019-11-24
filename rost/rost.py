@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pickle
 
-df = pd.read_csv(r'C:\Users\Jayesh\Desktop\2018-06-06-ss.cleaned.csv')
+# df = pd.read_csv(r'C:\Users\Jayesh\Desktop\2018-06-06-ss.cleaned.csv')
 df.len.hist(bins=100)
 print(df.shape)
 
@@ -48,7 +48,7 @@ model.summary()
 from sklearn.model_selection import train_test_split
 from keras.metrics import categorical_accuracy
 from keras import backend  as K
-import tensorflow as tf
+# import tensorflow as tf
 
 model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
 

@@ -1,5 +1,6 @@
 from choufasman import ChouFasman
 from gor import GOR3
+from rost import rost
 from Z import ZFactor
 
 cf = ChouFasman()
