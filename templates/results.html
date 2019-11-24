@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+        <h2>Results of the prediction</h2>
+        <h3>Secondary Structure</h3>
+        <p>According to Chou Fasman Method: {{ cf_pred }}</p>
+        <p>According to GOR method: {{ gor_pred }}</p>
+        <p>According to Rost and Sander method: {{ rs_pred }}</p>
+        <br>
+        <p><em>Note:
+            <ul>
+                <li>C: Beta Sheet</li>
+                <li>H: Helix</li>
+                <li>E: Extension (Turns/Coils)</li>
+            </ul>
+        </em></p>
+
+        <h3>3D Structure and Functional aspects</h3>
+        <p>According to Homology modeling: {{ bl_pred }}</p>
+        <p>According to Z-Factor estimation: {{ zf_pred }}</p>
+        <p>According to Deep Learning based prediction: {{ dgp_pred }}</p>
+    </body>
+</html>

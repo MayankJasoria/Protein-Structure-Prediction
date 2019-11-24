@@ -1,4 +1,4 @@
-class rost:
+class Rost:
 
     def __init__(self):
         pass
