@@ -5,6 +5,7 @@ import numpy as np
 from aminoacid import AminoAcid
 
 import json
+from ast import literal_eval
 
 class GOR3:
     """
@@ -50,19 +51,48 @@ class GOR3:
         """
         Method to save a trained model
         """
-        try:
-            # create a file for storing the model (overwrite previous results)
-            f=open("gor.model", "w", encoding="utf-8")
-            
+        params = {
+            "structures":self.structures,
+            "roc":str(self.roc),
+            "minScore":self.minScore,
+            "maxScore":self.maxScore,
+            "scores":str(self.scores),
+            "correctPred":self.correctPred,
+            "totalPred":self.totalPred,
+            "neighbourOffset":self.neighbourOffset,
+            "trainings":self.trainings,
+            "strucCount":str(self.strucCount),
+            "pairCount":str(self.pairCount),
+            "tripletCount":str(self.tripletCount)
+        }
 
-
-
-        finally:
-            # we are done, close the file
-            f.close()
+        with open("model.json", "w", encoding="utf-8") as model:
+            json.dump({str(k):v for k, v in params.items()}, model)
+            print("Model saved successfully")
 
     def load_model(self):
-        pass
+        """
+        Method to load an existing trained model
+        """
+        try:
+            with open("model.json", "r", encoding="utf-8") as model:
+                params = json.load(model)
+                self.structures = params["structures"]
+                self.roc = literal_eval(params["roc"])
+                self.minScore = params["minScore"]
+                self.maxScore = params["maxScore"]
+                self.scores = literal_eval(params["scores"])
+                self.correctPred = params["correctPred"]
+                self.totalPred = params["totalPred"]
+                self.neighbourOffset = params["neighbourOffset"]
+                self.trainings = params["trainings"]
+                self.strucCount = literal_eval(params["strucCount"])
+                self.pairCount = literal_eval(params["pairCount"])
+                self.tripletCount = literal_eval(params["tripletCount"])
+                print("Model loaded\n")
+                # print(params)
+        except Exception:
+            print("Model could not be loaded")
 
     def predict(self, sequence, realStructure=None):
         """
