@@ -9,6 +9,7 @@ class BLAST:
         self.hitlist_size = 5
 
     def execute(self, file):
+        print("\nRunning BLAST")
         record = SeqIO.read(file, format="fasta")
         result_handle = NCBIWWW.qblast("blastp", "nr", record.format("fasta"), hitlist_size = self.hitlist_size)
 
@@ -21,6 +22,8 @@ class BLAST:
         blast_record = NCBIXML.read(result_handle)
 
         result = []
+
+        print("COmparing BLAST results with predicted secondary structures")
 
         for alignment in blast_record.alignments:
             for hsp in alignment.hsps:

@@ -34,18 +34,19 @@ class ZFactor:
         print("Discriminant Factor = " , tr)
         print("H_phi = " , tot)
         
-        print("Is it a membrance protein? [Y/N]")
-        ch = input()
+        #print("Is it a membrance protein? [Y/N]")
+        #ch = input()
         
-        if(ch == 'Y'):
-            if(tr >= .38 and tr <= 0.66):
-                return ans.join("It's probably an internal membrane protein.") 
+        ans = ans + "**If it's a membrane protein: \n"
+        if(tr >= 0.38 and tr <= 0.66):
+            ans = ans + "It's probably an internal membrane protein."
             
-            elif(tr >= -.04 and tr <= 0.3):
-                return ans.join("It's probably an external membrane protein.")
-            else: return ans.join("Can't be determined!!!") 
+        elif(tr >= -.04 and tr <= 0.3):
+            ans = ans + "It's probably an external membrane protein."
+        else: ans = ans + "Can't be determined!!!" 
         
-        elif(tr>=-.03 and tr<=.3):
-                return ans.join("It's probably a non membrane membrane protein.")         
-        
-        else: return ans.join("Can't be determined!!!")
+        ans = ans + "**If it's a non-membrane protein: \n"
+        if(tr>= -.03 and tr<= 0.3):
+            ans = ans + "It's probably a non membrane membrane protein."         
+        else: ans = ans + "Can't be determined!!!"
+        return ans
