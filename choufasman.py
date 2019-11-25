@@ -279,7 +279,7 @@ class ChouFasman:
         print('final alphas: '+str(alphas))
         print('final betas: '+str(betas))
         # Build a sequence of spaces of the same length as seq. 
-        analysis = ['E' for i in range(len(seq))]
+        analysis = ['C' for i in range(len(seq))]
 
         # Fill in the predicted alpha helices
         for alpha in alphas:
@@ -288,10 +288,10 @@ class ChouFasman:
         # Fill in the predicted beta strands 
         for beta in betas:
             for i in range(beta[0], beta[1]):
-                analysis[i] = 'C'
+                analysis[i] = 'E'
         # Fill in the predicted beta turns
         for turn in turns:
-            analysis[turn] = 'E'
+            analysis[turn] = 'C'
 
         # Turn the analysis and the sequence into strings for ease
         # of printing
