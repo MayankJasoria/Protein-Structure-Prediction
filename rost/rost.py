@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 df = pd.read_csv(r'C:\Users\Jayesh\Desktop\2018-06-06-ss.cleaned.csv')
+xf = pd.read_csv(r'C:\Users\Jayesh\Desktop\sequence.csv')
 df.len.hist(bins=100)
 print(df.shape)
 
@@ -102,6 +103,37 @@ for i in range(N):
 print('testing')
 for i in range(N):
     plot_results(seq_test[i], y_test[i], y_test_pred[i])
+    
+print("-----")
+print(X_test[:3])
+print("-----")
 
+xf.len.hist(bins=100)
+input_seqs1, target_seqs1 = xf[['seq', 'sst3']][(xf.len <= maxlen_seq) & (~xf.has_nonstd_aa)].values.T
+input_grams1 = seq2ngrams(input_seqs1)
 
+tokenizer_encoder1 = Tokenizer()
+tokenizer_encoder1.fit_on_texts(input_grams1)
+input_data1 = tokenizer_encoder1.texts_to_sequences(input_grams1)
+input_data1 = sequence.pad_sequences(input_data1, maxlen=maxlen_seq, padding='post')
 
+tokenizer_decoder1 = Tokenizer(char_level=True)
+tokenizer_decoder1.fit_on_texts(target_seqs1)
+target_data1 = tokenizer_decoder1.texts_to_sequences(target_seqs1)
+target_data1 = sequence.pad_sequences(target_data1, maxlen=maxlen_seq, padding='post')
+target_data1 = to_categorical(target_data1)
+input_data1.shape, target_data1.shape
+
+X_train, X_test, y_train, y_test = train_test_split(input_data1, target_data1, test_size=1, random_state=0)
+seq_train, seq_test, target_train, target_test = train_test_split(input_seqs1, target_seqs1, test_size=1, random_state=0)
+
+y_train_pred1 = loaded_model.predict(X_train)
+y_test_pred1 = loaded_model.predict(X_test)
+plot_results(seq_train, y_train, y_train_pred)
+plot_results(seq_test, y_test, y_test_pred)
+
+#print(input_data1[0])
+##y_train_pred = loaded_model.predict(input_data)
+#y_test_pred1 = loaded_model.predict(input_data1[0])
+##plot_results(seq_train, y_train, y_train_pred)
+#plot_results(input_seqs1, target_data1, y_test_pred1)
