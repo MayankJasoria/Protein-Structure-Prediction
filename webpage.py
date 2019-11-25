@@ -14,7 +14,7 @@ def execute():
     # run the prediction and fetch the results
     cf_prediction, gor_prediction, rost_prediction, zf_prediction, bt_prediction, dgp_prediction = mainapp.predict(request.form["sequence"])
     return render_template("results.html",
-        ip_seq=request.form["sequence"]
+        ip_seq=request.form["sequence"],
         cf_pred=cf_prediction,
         gor_pred=gor_prediction,
         rs_pred=rost_prediction,
