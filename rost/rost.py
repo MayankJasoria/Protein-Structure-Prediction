@@ -1,139 +1,113 @@
-import numpy as np 
-import pandas as pd
-import matplotlib.pyplot as plt
-import pickle
+class Rost:
 
-df = pd.read_csv(r'C:\Users\Jayesh\Desktop\2018-06-06-ss.cleaned.csv')
-xf = pd.read_csv(r'C:\Users\Jayesh\Desktop\sequence.csv')
-df.len.hist(bins=100)
-print(df.shape)
+    def __init__(self):
+        pass
 
-def seq2ngrams(seqs, n=3):
-    return np.array([[seq[i:i+n] for i in range(len(seq))] for seq in seqs])
+    def execute(self, sequence):
+        import numpy as np 
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import pickle
 
-maxlen_seq = 128
-input_seqs, target_seqs = df[['seq', 'sst3']][(df.len <= maxlen_seq) & (~df.has_nonstd_aa)].values.T
-input_grams = seq2ngrams(input_seqs)
-print(len(input_seqs))
+        # df = pd.read_csv(r'C:\Users\Jayesh\Desktop\2018-06-06-ss.cleaned.csv')
+        df.len.hist(bins=100)
+        print(df.shape)
 
-from keras.preprocessing import text, sequence
-from keras.preprocessing.text import Tokenizer
-from keras.utils import to_categorical
+        def seq2ngrams(seqs, n=3):
+            return np.array([[seq[i:i+n] for i in range(len(seq))] for seq in seqs])
 
-tokenizer_encoder = Tokenizer()
-tokenizer_encoder.fit_on_texts(input_grams)
-input_data = tokenizer_encoder.texts_to_sequences(input_grams)
-input_data = sequence.pad_sequences(input_data, maxlen=maxlen_seq, padding='post')
+        maxlen_seq = 128
+        input_seqs, target_seqs = df[['seq', 'sst3']][(df.len <= maxlen_seq) & (~df.has_nonstd_aa)].values.T
+        input_grams = seq2ngrams(input_seqs)
+        print(len(input_seqs))
 
-tokenizer_decoder = Tokenizer(char_level=True)
-tokenizer_decoder.fit_on_texts(target_seqs)
-target_data = tokenizer_decoder.texts_to_sequences(target_seqs)
-target_data = sequence.pad_sequences(target_data, maxlen=maxlen_seq, padding='post')
-target_data = to_categorical(target_data)
-input_data.shape, target_data.shape
+        from keras.preprocessing import text, sequence
+        from keras.preprocessing.text import Tokenizer
+        from keras.utils import to_categorical
 
-from keras.models import Model, Input
-from keras.layers import LSTM, Embedding, Dense, TimeDistributed, Bidirectional
+        tokenizer_encoder = Tokenizer()
+        tokenizer_encoder.fit_on_texts(input_grams)
+        input_data = tokenizer_encoder.texts_to_sequences(input_grams)
+        input_data = sequence.pad_sequences(input_data, maxlen=maxlen_seq, padding='post')
 
-n_words = len(tokenizer_encoder.word_index) + 1
-n_tags = len(tokenizer_decoder.word_index) + 1
-print(n_words, n_tags)
+        tokenizer_decoder = Tokenizer(char_level=True)
+        tokenizer_decoder.fit_on_texts(target_seqs)
+        target_data = tokenizer_decoder.texts_to_sequences(target_seqs)
+        target_data = sequence.pad_sequences(target_data, maxlen=maxlen_seq, padding='post')
+        target_data = to_categorical(target_data)
+        input_data.shape, target_data.shape
 
-input = Input(shape=(maxlen_seq,))
-x = Embedding(input_dim=n_words, output_dim=128, input_length=maxlen_seq)(input)
-x = Bidirectional(LSTM(units=64, return_sequences=True, recurrent_dropout=0.1))(x)
-y = TimeDistributed(Dense(n_tags, activation="softmax"))(x)
-model = Model(input, y)
-model.summary()
+        from keras.models import Model, Input
+        from keras.layers import LSTM, Embedding, Dense, TimeDistributed, Bidirectional
 
-from sklearn.model_selection import train_test_split
-from keras.metrics import categorical_accuracy
-from keras import backend  as K
-import tensorflow as tf
+        n_words = len(tokenizer_encoder.word_index) + 1
+        n_tags = len(tokenizer_decoder.word_index) + 1
+        print(n_words, n_tags)
 
-model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
+        input = Input(shape=(maxlen_seq,))
+        x = Embedding(input_dim=n_words, output_dim=128, input_length=maxlen_seq)(input)
+        x = Bidirectional(LSTM(units=64, return_sequences=True, recurrent_dropout=0.1))(x)
+        y = TimeDistributed(Dense(n_tags, activation="softmax"))(x)
+        model = Model(input, y)
+        model.summary()
 
-X_train, X_test, y_train, y_test = train_test_split(input_data, target_data, test_size=.4, random_state=0)
-seq_train, seq_test, target_train, target_test = train_test_split(input_seqs, target_seqs, test_size=.4, random_state=0)
+        from sklearn.model_selection import train_test_split
+        from keras.metrics import categorical_accuracy
+        from keras import backend  as K
+        # import tensorflow as tf
 
-#model.fit(X_train, y_train, batch_size=128, epochs=1, validation_data=(X_test, y_test), verbose=1)
+        model.compile(optimizer="rmsprop", loss="categorical_crossentropy")
 
-def onehot_to_seq(oh_seq, index):
-    s = ''
-    for o in oh_seq:
-        i = np.argmax(o)
-        if i != 0:
-            s += index[i]
-        else:
-            break
-    return s
+        X_train, X_test, y_train, y_test = train_test_split(input_data, target_data, test_size=.4, random_state=0)
+        seq_train, seq_test, target_train, target_test = train_test_split(input_seqs, target_seqs, test_size=.4, random_state=0)
 
-def plot_results(x, y, y_):
-    print("---")
-    print("Input: " + str(x))
-    print("Target: " + str(onehot_to_seq(y, revsere_decoder_index).upper()))
-    print("Result: " + str(onehot_to_seq(y_, revsere_decoder_index).upper()))
-    fig = plt.figure(figsize=(10,2))
-    plt.imshow(y.T, cmap='Blues')
-    plt.imshow(y_.T, cmap='Reds', alpha=.5)
-    plt.yticks(range(4), [' '] + [revsere_decoder_index[i+1].upper() for i in range(3)])
-    plt.show()
-    
-revsere_decoder_index = {value:key for key,value in tokenizer_decoder.word_index.items()}
-revsere_encoder_index = {value:key for key,value in tokenizer_encoder.word_index.items()}
+        #model.fit(X_train, y_train, batch_size=128, epochs=1, validation_data=(X_test, y_test), verbose=1)
+        
+        revsere_decoder_index = {value:key for key,value in tokenizer_decoder.word_index.items()}
+        revsere_encoder_index = {value:key for key,value in tokenizer_encoder.word_index.items()}
 
-N=3
-y_train_pred = model.predict(X_train[:N])
-y_test_pred = model.predict(X_test[:N])
-print('training')
-for i in range(N):
-    plot_results(seq_train[i], y_train[i], y_train_pred[i])
-print('testing')
-for i in range(N):
-    plot_results(seq_test[i], y_test[i], y_test_pred[i])
+        N=3
+        y_train_pred = model.predict(X_train[:N])
+        y_test_pred = model.predict(X_test[:N])
+        print('training')
+        for i in range(N):
+            self.plot_results(seq_train[i], y_train[i], y_train_pred[i])
+        print('testing')
+        for i in range(N):
+            self.plot_results(seq_test[i], y_test[i], y_test_pred[i])
 
-loaded_model = pickle.load(open( "save.p", "rb" )) 
+        loaded_model = pickle.load(open( "save.p", "rb" )) 
 
-N=3
-y_train_pred = loaded_model.predict(X_train[:N])
-y_test_pred = loaded_model.predict(X_test[:N])
-print('training')
-for i in range(N):
-    plot_results(seq_train[i], y_train[i], y_train_pred[i])
-print('testing')
-for i in range(N):
-    plot_results(seq_test[i], y_test[i], y_test_pred[i])
-    
-print("-----")
-print(X_test[:3])
-print("-----")
+        N=3
+        y_train_pred = loaded_model.predict(X_train[:N])
+        y_test_pred = loaded_model.predict(X_test[:N])
+        print('training')
+        for i in range(N):
+            self.plot_results(seq_train[i], y_train[i], y_train_pred[i])
+        print('testing')
+        for i in range(N):
+            self.plot_results(seq_test[i], y_test[i], y_test_pred[i])
 
-xf.len.hist(bins=100)
-input_seqs1, target_seqs1 = xf[['seq', 'sst3']][(xf.len <= maxlen_seq) & (~xf.has_nonstd_aa)].values.T
-input_grams1 = seq2ngrams(input_seqs1)
+    def onehot_to_seq(self, oh_seq, index):
+        s = ''
+        for o in oh_seq:
+            i = np.argmax(o)
+            if i != 0:
+                s += index[i]
+            else:
+                break
+        return s
 
-tokenizer_encoder1 = Tokenizer()
-tokenizer_encoder1.fit_on_texts(input_grams1)
-input_data1 = tokenizer_encoder1.texts_to_sequences(input_grams1)
-input_data1 = sequence.pad_sequences(input_data1, maxlen=maxlen_seq, padding='post')
+    def plot_results(self, x, y, y_):
+        print("---")
+        print("Input: " + str(x))
+        print("Target: " + str(self.onehot_to_seq(y, revsere_decoder_index).upper()))
+        print("Result: " + str(self.onehot_to_seq(y_, revsere_decoder_index).upper()))
+        fig = plt.figure(figsize=(10,2))
+        plt.imshow(y.T, cmap='Blues')
+        plt.imshow(y_.T, cmap='Reds', alpha=.5)
+        plt.yticks(range(4), [' '] + [revsere_decoder_index[i+1].upper() for i in range(3)])
+        plt.show()
 
-tokenizer_decoder1 = Tokenizer(char_level=True)
-tokenizer_decoder1.fit_on_texts(target_seqs1)
-target_data1 = tokenizer_decoder1.texts_to_sequences(target_seqs1)
-target_data1 = sequence.pad_sequences(target_data1, maxlen=maxlen_seq, padding='post')
-target_data1 = to_categorical(target_data1)
-input_data1.shape, target_data1.shape
 
-X_train, X_test, y_train, y_test = train_test_split(input_data1, target_data1, test_size=1, random_state=0)
-seq_train, seq_test, target_train, target_test = train_test_split(input_seqs1, target_seqs1, test_size=1, random_state=0)
 
-y_train_pred1 = loaded_model.predict(X_train)
-y_test_pred1 = loaded_model.predict(X_test)
-plot_results(seq_train, y_train, y_train_pred)
-plot_results(seq_test, y_test, y_test_pred)
-
-#print(input_data1[0])
-##y_train_pred = loaded_model.predict(input_data)
-#y_test_pred1 = loaded_model.predict(input_data1[0])
-##plot_results(seq_train, y_train, y_train_pred)
-#plot_results(input_seqs1, target_data1, y_test_pred1)

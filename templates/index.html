@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <body>
+
+        <h2>Protein Structure and Function Predictor</h2>
+
+        <form method='post' action="{{ url_for('execute') }}">
+        Enter a protein sequence<br>
+        <textarea rows="5" cols="60" name="sequence"></textarea><br>
+        <input type="submit" value="Submit" name="action">
+        </form> 
+
+    </body>
+</html>

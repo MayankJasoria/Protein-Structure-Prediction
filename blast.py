@@ -1,27 +1,39 @@
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio import SeqIO
-record = SeqIO.read(r'C:\Users\Jayesh\Desktop\ins.fasta', format="fasta")
-result_handle = NCBIWWW.qblast("blastp", "nr", record.format("fasta"), hitlist_size = 3)
 
-with open("my_blast.xml", "w") as out_handle:
-    out_handle.write(result_handle.read())
-result_handle.close()
+class BLAST:
 
-result_handle = open("my_blast.xml")
+    def __init__(self):
+        self.E_VALUE_THRESH = 0.04
+        self.hitlist_size = 5
 
-blast_record = NCBIXML.read(result_handle)
+    def execute(self, file):
+        record = SeqIO.read(file, format="fasta")
+        result_handle = NCBIWWW.qblast("blastp", "nr", record.format("fasta"), hitlist_size = self.hitlist_size)
 
-E_VALUE_THRESH = 0.04
+        with open("my_blast.xml", "w") as out_handle:
+            out_handle.write(result_handle.read())
+        result_handle.close()
 
-for alignment in blast_record.alignments:
-     for hsp in alignment.hsps:
-         if hsp.expect < E_VALUE_THRESH:
-             print("****Alignment****")
-             print("sequence:", alignment.title)
-             print("length:", alignment.length)
-             print("e value:", hsp.expect)
-             print(hsp.query[0:75] + "...")
-             print(hsp.match[0:75] + "...")
-             print(hsp.sbjct[0:75] + "...")
-             print(" ")
+        result_handle = open("my_blast.xml")
+
+        blast_record = NCBIXML.read(result_handle)
+
+        result = []
+
+        for alignment in blast_record.alignments:
+            for hsp in alignment.hsps:
+                if hsp.expect < self.E_VALUE_THRESH:
+                    # print("****Alignment****")
+                    one_res = {}
+                    one_res["sequence"] = alignment.title
+                    one_res["length"] = alignment.length
+                    one_res["e value"] = hsp.expect
+                    one_res["hsp_query"] = hsp.query[:]
+                    one_res["hsp_match"] = hsp.match[:]
+                    one_res["hsp_sbjct"] = hsp.sbjct[:]
+                    result.append(one_res)
+
+        return str(result)
+                    

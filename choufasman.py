@@ -200,10 +200,10 @@ class ChouFasman:
             return []
 
     def execute(self, seq):
-        """Analyze seq using the Chou-Fasman algorithm and display
-        the results.  A represents 'alpha helix'.  B represents 
-        'beta strand'.  T represents "turn".  Space represents
-        'coil structure'.  
+        """
+        Analyze seq using the Chou-Fasman algorithm and display
+        the results.  H represents 'alpha helix'.  C represents 
+        'beta strand'.  E represents "turn" or 'coil structure'.  
         """
 
         # Find probable locations of alpha helices, beta strands,
@@ -279,22 +279,26 @@ class ChouFasman:
         print('final alphas: '+str(alphas))
         print('final betas: '+str(betas))
         # Build a sequence of spaces of the same length as seq. 
-        analysis = [' ' for i in range(len(seq))]
+        analysis = ['E' for i in range(len(seq))]
 
         # Fill in the predicted alpha helices
         for alpha in alphas:
             for i in range(alpha[0], alpha[1]):
-                analysis[i] = 'A'
+                analysis[i] = 'H'
         # Fill in the predicted beta strands 
         for beta in betas:
             for i in range(beta[0], beta[1]):
-                analysis[i] = 'B'
+                analysis[i] = 'C'
         # Fill in the predicted beta turns
         for turn in turns:
-            analysis[turn] = 'T'
+            analysis[turn] = 'E'
 
         # Turn the analysis and the sequence into strings for ease
         # of printing
         astr = ''.join(analysis)
+        # astr.replace("B", "C")
+        # astr.replace("A", "H")
+        # astr.replace("T", "E")
+        astr.replace(" ", "E")
 
         return astr
